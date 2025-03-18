@@ -1,0 +1,65 @@
+contents:
+  keyring:
+    - melange.rsa.pub
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+  repositories:
+    - packages/ffmpeg-packages
+    - packages/imd-packages
+    - https://packages.wolfi.dev/os
+  packages:
+    - busybox
+    - intel-media-driver
+    - jellyfin-web
+
+environment:
+  NVIDIA_DRIVER_CAPABILITIES: "all"
+  NVIDIA_VISIBLE_DEVICES: "all"
+  HEALTHCHECK_URL: "http://localhost:8096/health"
+  LC_ALL: "en_US.UTF-8"
+  LANG: "en_US.UTF-8"
+  LANGUAGE: "en_US:en"
+  JELLYFIN_DATA_DIR: "/config"
+  JELLYFIN_CACHE_DIR: "/cache"
+  JELLYFIN_CONFIG_DIR: "/config/config"
+  JELLYFIN_LOG_DIR: "/config/log"
+  JELLYFIN_WEB_DIR: "/usr/lib/jellyfin/jellyfin-web"
+  HOME: "/home/jellyfin"
+
+accounts:
+  run-as: "65532"
+  users:
+    - uid: 65532
+      gid: 65532
+      username: "jellyfin"
+
+entrypoint:
+  command: /usr/bin/jellyfin
+
+paths:
+  - path: "/cache"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+  - path: "/config"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+  - path: "/jellyfin"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+  - path: "/usr/lib/jellyfin"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+
+archs:
+  - x86_64

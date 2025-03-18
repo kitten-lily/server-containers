@@ -1,0 +1,42 @@
+_main:
+    @just --list
+
+_keygen:
+    @test -f melange.rsa && test -f melange.rsa.pub || docker run --rm -v ./:/work cgr.dev/chainguard/melange keygen
+
+# Build Jellyfin image
+jellyfin-image: _keygen
+    docker run --rm -v ./:/work \
+    -w /work cgr.dev/chainguard/apko build \
+      jellyfin.apko.yaml jellyfin:latest jellyfin.tar
+
+# Build Intel GMM Lib
+intel-gmmlib: _keygen
+    docker run --privileged --rm -v ./:/work \
+      cgr.dev/chainguard/melange build intel-gmmlib.melange.yaml \
+      --arch amd64 \
+      --signing-key melange.rsa \
+      --out-dir packages/imd-packages
+
+# Build Intel Media Driver
+intel-media-driver: _keygen
+    docker run --privileged --rm \
+      -v "${PWD}":/work \
+      cgr.dev/chainguard/melange build intel-media-driver.melange.yaml \
+      --arch amd64 \
+      --signing-key melange.rsa \
+      --repository-append packages/imd-packages \
+      --keyring-append melange.rsa.pub \
+      --out-dir packages/imd-packages
+
+# Build FFmpeg
+ffmpeg: _keygen
+    ./fetch-ffmpeg.sh && \
+    docker run --privileged --rm \
+      -v "${PWD}":/work \
+      cgr.dev/chainguard/melange build ffmpeg.melange.yaml \
+      --arch amd64 \
+      --signing-key melange.rsa \
+      --repository-append https://packages.wolfi.dev/os  \
+      --keyring-append https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
+      --out-dir packages/ffmpeg-packages

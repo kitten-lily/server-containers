@@ -1,0 +1,44 @@
+name: Build Intel Media Driver
+on:
+  workflow_call:
+    secrets:
+      MELANGE_PRIVATE_KEY:
+        description: "The private key used to sign packages"
+        required: true
+
+jobs:
+  build:
+    name: Build and upload packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Setup signing key
+        run: |
+          cat << EOF > ./melange.rsa
+          ${{ secrets.MELANGE_PRIVATE_KEY }}
+          EOF
+
+      - name: Setup public key
+        run: |
+          cat << EOF > ./melange.rsa.pub
+          ${{ secrets.MELANGE_PUBLIC_KEY }}
+          EOF
+
+      - uses: chainguard-dev/actions/setup-melange@main
+
+      - uses: chainguard-dev/actions/melange-build-pkg@main
+        with:
+          sign-with-key: true
+          multi-config: jellyfin/intel-gmmlib.melange.yaml
+            jellyfin/intel-media-driver.melange.yaml
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: imd-packages
+          path: ${{ github.workspace }}/packages

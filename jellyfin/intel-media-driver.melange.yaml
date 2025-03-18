@@ -1,0 +1,54 @@
+package:
+  name: intel-media-driver
+  version: 24.4.4
+  epoch: 0
+  description: Intel Media Driver for VAAPI
+  copyright:
+    - license: BSD-3-Clause AND MIT
+
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    repositories:
+      - https://packages.wolfi.dev/os
+    packages:
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - cmake
+      - intel-gmmlib-dev
+      - libpciaccess-dev
+      - libva-dev
+      - samurai
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://github.com/intel/media-driver
+      tag: intel-media-${{package.version}}
+      expected-commit: d3c30f6dddb43bd7b1b0a4d38a0d0ba47dda5726
+
+  - runs: |
+      cmake -B build -G Ninja -Wno-dev \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_INSTALL_LIBDIR=lib \
+      -DBUILD_SHARED_LIBS=True \
+      -DINSTALL_DRIVER_SYSCONF=OFF \
+      -DMEDIA_BUILD_FATAL_WARNINGS=OFF
+      cmake --build build
+      DESTDIR="${{targets.destdir}}" cmake --install build
+
+  - uses: strip
+
+update:
+  enabled: true
+  ignore-regex-patterns:
+    - ".*alpha.*"
+    - ".*beta.*"
+    - ".*rc.*"
+  github:
+    identifier: intel/media-driver
+    use-tag: true
+    strip-prefix: intel-media-

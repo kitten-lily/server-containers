@@ -1,0 +1,57 @@
+package:
+  name: intel-gmmlib
+  version: 22.7.0
+  epoch: 0
+  description: Intel Graphics Memory Management Library
+  copyright:
+    - license: MIT
+
+environment:
+  contents:
+    keyring:
+      - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    repositories:
+      - https://packages.wolfi.dev/os
+    packages:
+      - build-base
+      - busybox
+      - ca-certificates-bundle
+      - cmake
+      - samurai
+
+pipeline:
+  - uses: git-checkout
+    with:
+      repository: https://github.com/intel/gmmlib
+      tag: ${{package.name}}-${{package.version}}
+      expected-commit: 8325c5683b4c68301cd5515a37bd72529cee596d
+
+  - runs: |
+      cmake -B build -G Ninja \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX=/usr \
+      -DCMAKE_INSTALL_LIBDIR=lib \
+      -DBUILD_SHARED_LIBS=True \
+      -DINSTALL_DRIVER_SYSCONF=OFF \
+      -DMEDIA_BUILD_FATAL_WARNINGS=OFF
+      cmake --build build
+      DESTDIR="${{targets.destdir}}" cmake --install build
+
+  - uses: strip
+
+subpackages:
+  - name: intel-gmmlib-dev
+    pipeline:
+      - uses: split/dev
+    description: intel-gmmlib development headers
+
+update:
+  enabled: true
+  ignore-regex-patterns:
+    - ".*alpha.*"
+    - ".*beta.*"
+    - ".*rc.*"
+  github:
+    identifier: intel/gmmlib
+    use-tag: true
+    strip-prefix: intel-gmmlib-

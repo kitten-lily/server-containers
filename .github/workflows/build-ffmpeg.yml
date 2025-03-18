@@ -1,0 +1,44 @@
+name: Build FFmpeg
+on:
+  workflow_call:
+    secrets:
+      MELANGE_PRIVATE_KEY:
+        description: "The private key used to sign packages"
+        required: true
+
+jobs:
+  build:
+    name: Build and upload packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Setup build files
+        run: |
+          cd jellyfin
+          ./fetch-ffmpeg.sh
+
+      - name: Setup signing key
+        run: |
+          cat << EOF > ./melange.rsa
+          ${{ secrets.MELANGE_PRIVATE_KEY }}
+          EOF
+
+      - uses: chainguard-dev/actions/setup-melange@main
+
+      - uses: chainguard-dev/actions/melange-build-pkg@main
+        with:
+          sign-with-key: true
+          keyring-append: "https://packages.wolfi.dev/os/wolfi-signing.rsa.pub"
+          repository-append: "https://packages.wolfi.dev/os"
+          config: jellyfin/ffmpeg.melange.yaml
+
+      - name: Upload packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: ffmpeg-packages
+          path: ${{ github.workspace }}/packages
