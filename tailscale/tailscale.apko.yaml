@@ -1,0 +1,66 @@
+contents:
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+  repositories:
+    - https://packages.wolfi.dev/os
+  packages:
+    - busybox
+    - tailscale
+
+environment:
+  LC_ALL: "en_US.UTF-8"
+  LANG: "en_US.UTF-8"
+  LANGUAGE: "en_US:en"
+  HOME: "/home/tailscale"
+  TS_AUTH_KEY: ""
+  TS_ROUTES: ""
+  TS_DEST_IP: ""
+  TS_TAILSCALED_EXTRA_ARGS: ""
+  TS_EXTRA_ARGS: ""
+  TS_USERSPACE: ""
+  TS_STATE_DIR: ""
+  TS_ACCEPT_DNS: ""
+  TS_KUBE_SECRET: ""
+  TS_SOCKS5_SERVER: ""
+  TS_OUTBOUND_HTTP_PROXY_LISTEN: ""
+  TS_SOCKET: ""
+  TS_AUTH_ONCE: "true"
+
+accounts:
+  run-as: "65532"
+  users:
+    - uid: 65532
+      gid: 65532
+      username: "tailscale"
+
+entrypoint:
+  command: /usr/bin/containerboot
+
+# paths:
+#   - path: "/cache"
+#     type: "directory"
+#     uid: 65532
+#     gid: 65532
+#     permissions: 509
+#     recursive: true
+#   - path: "/config"
+#     type: "directory"
+#     uid: 65532
+#     gid: 65532
+#     permissions: 509
+#     recursive: true
+#   - path: "/jellyfin"
+#     type: "directory"
+#     uid: 65532
+#     gid: 65532
+#     permissions: 509
+#     recursive: true
+#   - path: "/usr/lib/jellyfin"
+#     type: "directory"
+#     uid: 65532
+#     gid: 65532
+#     permissions: 509
+#     recursive: true
+
+archs:
+  - x86_64

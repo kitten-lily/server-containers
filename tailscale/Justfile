@@ -1,0 +1,11 @@
+_main:
+    @just --list
+
+_keygen:
+    @test -f melange.rsa && test -f melange.rsa.pub || docker run --rm -v ./:/work cgr.dev/chainguard/melange keygen
+
+# Build Tailscale image
+tailscale-image: _keygen
+    docker run --rm -v ./:/work \
+    -w /work cgr.dev/chainguard/apko build \
+      tailscale.apko.yaml tailscale:latest tailscale.tar

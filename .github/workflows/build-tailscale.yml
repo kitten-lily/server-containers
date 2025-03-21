@@ -1,0 +1,40 @@
+name: Build and Push Tailscale Image
+on:
+  schedule:
+    - cron: "0 4 * * *" # 04:00 UTC every day
+  pull_request:
+  merge_group:
+  workflow_dispatch:
+env:
+  IMAGE_TAGS: latest
+  IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}/tailscale
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@main
+
+      - name: Generate snapshot date
+        id: snapshot-date
+        run: |
+          echo "date=$(date -u +%Y%m%d)" >> $GITHUB_OUTPUT
+          echo "epoch=$(date -u +%s)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - uses: chainguard-images/actions/apko-publish@main
+        id: apko
+        with:
+          archs: x86_64
+          tag: ${{ env.IMAGE_REGISTRY }}:${{ env.IMAGE_TAGS }}
+          source-date-epoch: ${{ steps.snapshot-date.outputs.epoch }}
+          config: tailscale/tailscale.apko.yaml
