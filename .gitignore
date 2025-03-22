@@ -8,3 +8,13 @@ melange.rsa.pub
 ffmpeg.melange.yaml
 sbom-*.json
 *.tar
+
+caddy/packages/
+
+caddy/Caddyfile
+
+caddy/index.html
+
+caddy/quic-go.patch
+
+caddy/caddy.melange.yaml

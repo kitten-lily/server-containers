@@ -1,0 +1,24 @@
+_main:
+    @just --list
+
+_keygen:
+    @test -f melange.rsa && test -f melange.rsa.pub || docker run --rm -v ./:/work cgr.dev/chainguard/melange keygen
+
+# Build Caddy image
+caddy-image: _keygen
+    docker run --rm -v ./:/work \
+    -w /work cgr.dev/chainguard/apko build \
+      caddy.apko.yaml caddy:latest caddy.tar
+
+
+# Build Caddy
+caddy: _keygen
+    ./fetch-caddy.sh && \
+    docker run --privileged --rm \
+      -v "${PWD}":/work \
+      cgr.dev/chainguard/melange build caddy.melange.yaml \
+      --arch amd64 \
+      --signing-key melange.rsa \
+      --repository-append https://packages.wolfi.dev/os  \
+      --keyring-append https://packages.wolfi.dev/os/wolfi-signing.rsa.pub \
+      --out-dir packages/caddy-packages

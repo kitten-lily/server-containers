@@ -1,0 +1,31 @@
+contents:
+  keyring:
+    - https://packages.wolfi.dev/os/wolfi-signing.rsa.pub
+    - melange.rsa.pub
+  repositories:
+    - https://packages.wolfi.dev/os
+    - packages/caddy-packages
+  packages:
+    - ca-certificates-bundle
+    - wolfi-base
+    - caddy
+
+entrypoint:
+  command: /usr/bin/caddy run --config /etc/caddy/Caddyfile
+
+paths:
+  - path: "/etc/caddy"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+  - path: "/home/caddy"
+    type: "directory"
+    uid: 65532
+    gid: 65532
+    permissions: 509
+    recursive: true
+
+archs:
+  - x86_64
