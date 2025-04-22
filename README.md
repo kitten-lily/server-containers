@@ -4,7 +4,7 @@
 ### Jellyfin
 The Jellyfin media server.
 
-## Wolfi APK packages to support the avove images
+## Wolfi APK packages to support the above images
 ### Intel Graphics Media Memory Library (gmmlib)
 Dependency for Intel Media Driver (iHD)
 ### Intel Media Driver (iHD)
